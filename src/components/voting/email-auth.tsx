@@ -68,9 +68,17 @@ export function EmailAuth({ onAuthSuccess }: EmailAuthProps) {
         return
       }
 
-      // In a real implementation, send OTP via email service
-      // For demo purposes, we'll show the OTP in console
-      console.log(`OTP for ${email}: ${generatedOTP}`)
+      // Send OTP via email using edge function
+      const { error: emailError } = await supabase.functions.invoke('send-otp', {
+        body: {
+          email: email,
+          otp: generatedOTP
+        }
+      })
+
+      if (emailError) {
+        throw new Error('Failed to send OTP email')
+      }
       
       toast({
         title: "OTP Sent",
