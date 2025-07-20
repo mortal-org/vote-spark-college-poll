@@ -21,16 +21,16 @@ export function EmailAuth({ onAuthSuccess }: EmailAuthProps) {
   const { toast } = useToast()
 
   const isValidCollegeEmail = (email: string) => {
-    // Add your college domain validation here
-    const collegeDomains = ['college.edu', 'university.edu', 'student.college.edu']
-    return collegeDomains.some(domain => email.endsWith(`@${domain}`))
+    // Accept any valid email format for now
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return emailRegex.test(email)
   }
 
   const sendOTP = async () => {
     if (!email) {
       toast({
         title: "Email Required",
-        description: "Please enter your college email address.",
+        description: "Please enter your email address.",
         variant: "destructive"
       })
       return
@@ -39,7 +39,7 @@ export function EmailAuth({ onAuthSuccess }: EmailAuthProps) {
     if (!isValidCollegeEmail(email)) {
       toast({
         title: "Invalid Email",
-        description: "Please use your official college email address.",
+        description: "Please enter a valid email address.",
         variant: "destructive"
       })
       return
@@ -158,12 +158,12 @@ export function EmailAuth({ onAuthSuccess }: EmailAuthProps) {
               <div className="space-y-2">
                 <Label htmlFor="email" className="flex items-center gap-2">
                   <Mail className="h-4 w-4" />
-                  College Email Address
+                  Email Address
                 </Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="student@college.edu"
+                  placeholder="your@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="h-12"
