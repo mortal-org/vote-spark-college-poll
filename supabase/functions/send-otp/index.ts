@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
 const corsHeaders = {
@@ -34,7 +35,7 @@ const handler = async (req: Request): Promise<Response> => {
             subject: 'Your Voting OTP Code',
           },
         ],
-        from: { email: 'noreply@voting.college.edu', name: 'College Voting System' },
+        from: { email: 'onboarding@resend.dev', name: 'College Voting System' },
         content: [
           {
             type: 'text/html',
