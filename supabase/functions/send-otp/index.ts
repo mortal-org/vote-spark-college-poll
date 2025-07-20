@@ -35,7 +35,7 @@ const handler = async (req: Request): Promise<Response> => {
             subject: 'Your Voting OTP Code',
           },
         ],
-        from: { email: 'onboarding@resend.dev', name: 'College Voting System' },
+        from: { email: 'royalknights012@gmail.com', name: 'College Voting System' },
         content: [
           {
             type: 'text/html',
