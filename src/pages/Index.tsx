@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { EmailAuth } from "@/components/voting/email-auth"
+import { RegMobileAuth } from "@/components/voting/reg-mobile-auth"
 import { VotingBallot } from "@/components/voting/voting-ballot"
 import { VoteSuccess } from "@/components/voting/vote-success"
 
@@ -7,11 +7,13 @@ type VotingState = 'auth' | 'voting' | 'success'
 
 const Index = () => {
   const [state, setState] = useState<VotingState>('auth')
-  const [voterEmail, setVoterEmail] = useState('')
+  const [voterRegNo, setVoterRegNo] = useState('')
+  const [voterMobile, setVoterMobile] = useState('')
   const [voterToken, setVoterToken] = useState('')
 
-  const handleAuthSuccess = (email: string, token: string) => {
-    setVoterEmail(email)
+  const handleAuthSuccess = (regNo: string, mobile: string, token: string) => {
+    setVoterRegNo(regNo)
+    setVoterMobile(mobile)
     setVoterToken(token)
     setState('voting')
   }
@@ -22,25 +24,27 @@ const Index = () => {
 
   const handleReset = () => {
     setState('auth')
-    setVoterEmail('')
+    setVoterRegNo('')
+    setVoterMobile('')
     setVoterToken('')
   }
 
   return (
     <>
       {state === 'auth' && (
-        <EmailAuth onAuthSuccess={handleAuthSuccess} />
+        <RegMobileAuth onAuthSuccess={handleAuthSuccess} />
       )}
       {state === 'voting' && (
         <VotingBallot 
-          email={voterEmail}
+          regNo={voterRegNo}
+          mobile={voterMobile}
           token={voterToken}
           onVoteSuccess={handleVoteSuccess}
         />
       )}
       {state === 'success' && (
         <VoteSuccess 
-          email={voterEmail}
+          regNo={voterRegNo}
           onReset={handleReset}
         />
       )}

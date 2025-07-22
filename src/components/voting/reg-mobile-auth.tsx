@@ -146,6 +146,7 @@ export function RegMobileAuth({ onAuthSuccess }: RegMobileAuthProps) {
         .upsert({
           reg_no: regNo,
           mobile: mobile,
+          email: '', // Empty string since email is now optional
           token: votingToken,
           voted: false
         })

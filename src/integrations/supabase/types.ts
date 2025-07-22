@@ -17,7 +17,7 @@ export type Database = {
       voters: {
         Row: {
           created_at: string
-          email: string
+          email: string | null
           id: string
           mobile: string | null
           name_president: string | null
@@ -32,7 +32,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          email: string
+          email?: string | null
           id?: string
           mobile?: string | null
           name_president?: string | null
@@ -47,7 +47,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
-          email?: string
+          email?: string | null
           id?: string
           mobile?: string | null
           name_president?: string | null

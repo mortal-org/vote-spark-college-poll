@@ -4,14 +4,14 @@ import { Button } from "@/components/ui/button"
 import { CheckCircle, ThumbsUp, Share2, Download } from "lucide-react"
 
 interface VoteSuccessProps {
-  email: string
+  regNo: string
   onReset: () => void
 }
 
-export function VoteSuccess({ email, onReset }: VoteSuccessProps) {
+export function VoteSuccess({ regNo, onReset }: VoteSuccessProps) {
   const generateReceipt = () => {
     const receiptData = {
-      voterId: email,
+      voterRegNo: regNo,
       timestamp: new Date().toISOString(),
       electionId: "college-election-2024",
       status: "vote-submitted"
@@ -53,8 +53,8 @@ export function VoteSuccess({ email, onReset }: VoteSuccessProps) {
             </h3>
             <div className="grid grid-cols-1 gap-3 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Voter Email:</span>
-                <span className="font-medium">{email}</span>
+                <span className="text-muted-foreground">Registration No:</span>
+                <span className="font-medium">{regNo}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Submission Time:</span>

@@ -10,7 +10,8 @@ import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 
 interface VotingBallotProps {
-  email: string
+  regNo: string
+  mobile: string
   token: string
   onVoteSuccess: () => void
 }
@@ -50,7 +51,7 @@ const candidates: Candidate[] = [
   }
 ]
 
-export function VotingBallot({ email, token, onVoteSuccess }: VotingBallotProps) {
+export function VotingBallot({ regNo, mobile, token, onVoteSuccess }: VotingBallotProps) {
   const [selectedCandidate, setSelectedCandidate] = useState<string>("")
   const [loading, setLoading] = useState(false)
   const [votingEnded, setVotingEnded] = useState(false)
@@ -96,10 +97,11 @@ export function VotingBallot({ email, token, onVoteSuccess }: VotingBallotProps)
         .from('voters')
         .update({
           voted: true,
-          vote: selectedCandidate,
-          name: candidates.find(c => c.id === selectedCandidate)?.name
+          vote_president: selectedCandidate,
+          name_president: candidates.find(c => c.id === selectedCandidate)?.name
         })
-        .eq('email', email)
+        .eq('reg_no', regNo)
+        .eq('mobile', mobile)
         .eq('token', token)
 
       if (error) throw error
@@ -144,7 +146,7 @@ export function VotingBallot({ email, token, onVoteSuccess }: VotingBallotProps)
               <div className="flex items-center space-x-3">
                 <User className="h-5 w-5 text-primary" />
                 <span className="font-medium">Authenticated Voter:</span>
-                <span className="text-muted-foreground">{email}</span>
+                <span className="text-muted-foreground">Reg: {regNo} | Mobile: +91{mobile}</span>
               </div>
               <Badge variant="secondary" className="bg-accent/10 text-accent">
                 <CheckCircle className="h-3 w-3 mr-1" />
