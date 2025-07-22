@@ -4,15 +4,15 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp"
-import { Loader2, Mail, Shield, Vote } from "lucide-react"
+import { Loader2, User, Phone, Shield, Vote } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 
-interface EmailAuthProps {
+interface RegMobileAuthProps {
   onAuthSuccess: (regNo: string, mobile: string, token: string) => void
 }
 
-export function EmailAuth({ onAuthSuccess }: EmailAuthProps) {
+export function RegMobileAuth({ onAuthSuccess }: RegMobileAuthProps) {
   const [step, setStep] = useState<'regNo' | 'mobile' | 'otp'>('regNo')
   const [regNo, setRegNo] = useState('')
   const [mobile, setMobile] = useState('')
@@ -21,26 +21,53 @@ export function EmailAuth({ onAuthSuccess }: EmailAuthProps) {
   const [sentToken, setSentToken] = useState('')
   const { toast } = useToast()
 
-  const isValidCollegeEmail = (email: string) => {
-    // Accept any valid email format for now
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    return emailRegex.test(email)
+  const isValidRegNo = (regNo: string) => {
+    // Basic validation for registration number (alphanumeric, min 4 chars)
+    return regNo.length >= 4 && /^[a-zA-Z0-9]+$/.test(regNo)
   }
 
-  const sendOTP = async () => {
-    if (!email) {
+  const isValidMobile = (mobile: string) => {
+    // Validate Indian mobile number format (10 digits)
+    const mobileRegex = /^[6-9]\d{9}$/
+    return mobileRegex.test(mobile)
+  }
+
+  const proceedToMobile = () => {
+    if (!regNo) {
       toast({
-        title: "Email Required",
-        description: "Please enter your email address.",
+        title: "Registration Number Required",
+        description: "Please enter your registration number.",
         variant: "destructive"
       })
       return
     }
 
-    if (!isValidCollegeEmail(email)) {
+    if (!isValidRegNo(regNo)) {
       toast({
-        title: "Invalid Email",
-        description: "Please enter a valid email address.",
+        title: "Invalid Registration Number",
+        description: "Please enter a valid registration number (minimum 4 characters, alphanumeric).",
+        variant: "destructive"
+      })
+      return
+    }
+
+    setStep('mobile')
+  }
+
+  const sendOTP = async () => {
+    if (!mobile) {
+      toast({
+        title: "Mobile Number Required",
+        description: "Please enter your mobile number.",
+        variant: "destructive"
+      })
+      return
+    }
+
+    if (!isValidMobile(mobile)) {
+      toast({
+        title: "Invalid Mobile Number",
+        description: "Please enter a valid 10-digit mobile number.",
         variant: "destructive"
       })
       return
@@ -55,8 +82,9 @@ export function EmailAuth({ onAuthSuccess }: EmailAuthProps) {
       // Check if user already voted
       const { data: existingVoter } = await supabase
         .from('voters')
-        .select('voted, email')
-        .eq('email', email)
+        .select('voted, reg_no, mobile')
+        .eq('reg_no', regNo)
+        .eq('mobile', mobile)
         .single()
 
       if (existingVoter?.voted) {
@@ -69,21 +97,21 @@ export function EmailAuth({ onAuthSuccess }: EmailAuthProps) {
         return
       }
 
-      // Send OTP via email using edge function
-      const { error: emailError } = await supabase.functions.invoke('send-otp', {
+      // Send OTP via SMS using edge function
+      const { error: smsError } = await supabase.functions.invoke('send-otp', {
         body: {
-          email: email,
+          mobile: mobile,
           otp: generatedOTP
         }
       })
 
-      if (emailError) {
-        throw new Error('Failed to send OTP email')
+      if (smsError) {
+        throw new Error('Failed to send OTP SMS')
       }
       
       toast({
         title: "OTP Sent",
-        description: `Verification code sent to ${email}. Check your inbox.`,
+        description: `Verification code sent to +91${mobile}. Check your messages.`,
       })
       
       setStep('otp')
@@ -116,7 +144,8 @@ export function EmailAuth({ onAuthSuccess }: EmailAuthProps) {
       const { error } = await supabase
         .from('voters')
         .upsert({
-          email,
+          reg_no: regNo,
+          mobile: mobile,
           token: votingToken,
           voted: false
         })
@@ -128,7 +157,7 @@ export function EmailAuth({ onAuthSuccess }: EmailAuthProps) {
         description: "You are now authenticated to vote.",
       })
       
-      onAuthSuccess(email, votingToken)
+      onAuthSuccess(regNo, mobile, votingToken)
     } catch (error) {
       toast({
         title: "Authentication Failed",
@@ -150,40 +179,79 @@ export function EmailAuth({ onAuthSuccess }: EmailAuthProps) {
           </div>
           <CardTitle className="text-2xl font-bold">College Election 2024</CardTitle>
           <CardDescription>
-            Secure voting with email verification
+            Secure voting with registration number and mobile verification
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {step === 'email' && (
+          {step === 'regNo' && (
             <>
               <div className="space-y-2">
-                <Label htmlFor="email" className="flex items-center gap-2">
-                  <Mail className="h-4 w-4" />
-                  Email Address
+                <Label htmlFor="regNo" className="flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  Registration Number
                 </Label>
                 <Input
-                  id="email"
-                  type="email"
-                  placeholder="your@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  id="regNo"
+                  type="text"
+                  placeholder="Enter your registration number"
+                  value={regNo}
+                  onChange={(e) => setRegNo(e.target.value.toUpperCase())}
                   className="h-12"
                 />
               </div>
               <Button 
-                onClick={sendOTP}
-                disabled={loading}
+                onClick={proceedToMobile}
                 className="w-full h-12 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90"
               >
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Sending Code...
-                  </>
-                ) : (
-                  'Send Verification Code'
-                )}
+                Continue
               </Button>
+            </>
+          )}
+
+          {step === 'mobile' && (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="mobile" className="flex items-center gap-2">
+                  <Phone className="h-4 w-4" />
+                  Mobile Number
+                </Label>
+                <div className="flex">
+                  <div className="flex items-center px-3 bg-muted rounded-l-md border border-r-0">
+                    <span className="text-sm text-muted-foreground">+91</span>
+                  </div>
+                  <Input
+                    id="mobile"
+                    type="tel"
+                    placeholder="9876543210"
+                    value={mobile}
+                    onChange={(e) => setMobile(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                    className="h-12 rounded-l-none"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Button 
+                  onClick={sendOTP}
+                  disabled={loading}
+                  className="w-full h-12 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Sending Code...
+                    </>
+                  ) : (
+                    'Send Verification Code'
+                  )}
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  onClick={() => setStep('regNo')}
+                  className="w-full"
+                >
+                  Back to Registration Number
+                </Button>
+              </div>
             </>
           )}
 
@@ -196,7 +264,7 @@ export function EmailAuth({ onAuthSuccess }: EmailAuthProps) {
                 <div>
                   <h3 className="font-semibold">Enter Verification Code</h3>
                   <p className="text-sm text-muted-foreground">
-                    We sent a 6-digit code to {email}
+                    We sent a 6-digit code to +91{mobile}
                   </p>
                 </div>
               </div>
@@ -236,10 +304,10 @@ export function EmailAuth({ onAuthSuccess }: EmailAuthProps) {
                 
                 <Button 
                   variant="ghost" 
-                  onClick={() => setStep('email')}
+                  onClick={() => setStep('mobile')}
                   className="w-full"
                 >
-                  Back to Email
+                  Back to Mobile Number
                 </Button>
               </div>
             </>

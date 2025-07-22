@@ -19,27 +19,45 @@ export type Database = {
           created_at: string
           email: string
           id: string
-          name: string | null
+          mobile: string | null
+          name_president: string | null
+          name_secretary: string | null
+          name_treasurer: string | null
+          reg_no: string | null
           token: string
-          vote: string | null
+          vote_president: string | null
+          vote_secretary: string | null
+          vote_treasurer: string | null
           voted: boolean
         }
         Insert: {
           created_at?: string
           email: string
           id?: string
-          name?: string | null
+          mobile?: string | null
+          name_president?: string | null
+          name_secretary?: string | null
+          name_treasurer?: string | null
+          reg_no?: string | null
           token: string
-          vote?: string | null
+          vote_president?: string | null
+          vote_secretary?: string | null
+          vote_treasurer?: string | null
           voted?: boolean
         }
         Update: {
           created_at?: string
           email?: string
           id?: string
-          name?: string | null
+          mobile?: string | null
+          name_president?: string | null
+          name_secretary?: string | null
+          name_treasurer?: string | null
+          reg_no?: string | null
           token?: string
-          vote?: string | null
+          vote_president?: string | null
+          vote_secretary?: string | null
+          vote_treasurer?: string | null
           voted?: boolean
         }
         Relationships: []
